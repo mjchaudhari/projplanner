@@ -22,10 +22,9 @@ Vue.use(VueRouter)
     component: Projects,
     beforeEnter: (to, from,  next) =>{
         //Get all projects of this user
-
-        store.dispatch('getProjects' )
+        store.dispatch('getProjects', to.params.userId )
         .then (()=>{
-          console.log("proejcts getched in store")
+          console.log("proejcts updated in store")
           next();
         })
         .catch(()=>{
@@ -39,8 +38,7 @@ Vue.use(VueRouter)
     component: Project,
     beforeEnter: (to, from, next) =>{
         let projId = to.params.projId;
-        let userId = 'default';
-        store.dispatch('getProjectData', {userId ,projId })
+        store.dispatch('getProjectData', { projId })
         .then (()=>{
           console.log("proejcts getched in store")
           next();

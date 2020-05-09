@@ -38,8 +38,8 @@ const mutations = {
 }
 
 const actions = {
-    async getProjectData({commit}, userId, projId){
-        var data  = await svc.getProjectData(userId, projId)
+    async getProjectData({commit}, params){
+        var data  = await svc.getProjectData(params.projId)
         commit("updateProject", data)
     }
 }

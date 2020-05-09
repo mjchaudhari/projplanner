@@ -3,8 +3,8 @@
         
         <nav class="nav nav-bar">
             <h1 class="navbar-brand" >{{project.name}}</h1>
-            <router-link class="nav-link" :to="{name: 'plan', params:{projId: project.id}}">Plan</router-link>
-            <router-link class="nav-link" :to="{name: 'detail', params:{projId: project.id}}">Detail</router-link>
+            <router-link class="nav-link" :to="{name: 'plan', params:{projId: projId}}">Plan</router-link>
+            <router-link class="nav-link" :to="{name: 'detail', params:{projId: projId}}">Detail</router-link>
             <router-link class="nav-link" :to="{name: 'projects'}">Back to all projects</router-link>
         </nav>
         <h3>{{project.description}}</h3>
@@ -13,12 +13,13 @@
 </template>
 
 <script>
-import svc from "../data/data.service"
 
 export default {
     name: "Project",
     data(){
-        return {}
+        return {
+            projId : this.$route.params.projId
+        }
     }, 
     computed:{
         project(){
@@ -28,16 +29,8 @@ export default {
     beforeCreate(){
       console.log('before create : ' + this.$route.params.projId );
     },
-    created(){
-        console.log(this.$route.params.projId )
-        svc.getProjectData(null, this.$route.params.projId)
-        .then((data)=>{
-            //Update the store
-            this.$store.commit('updateProject', data)
-        })
-        .catch((err)=>{
-            console.log(err)
-        })
+    mounted(){
+        console.log(this.$route.params.projId )        
     },
     methods:{
 

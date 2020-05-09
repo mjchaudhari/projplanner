@@ -156,7 +156,7 @@ export default {
     .chart{
         width:85%;
         height:75vh;
-        background-color: whitesmoke;
+        
     }
 
     .text-on-bar{

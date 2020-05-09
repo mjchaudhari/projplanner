@@ -27,17 +27,25 @@ export default {
       }
     },
     computed:{
-        ...mapGetters(["projects"])
+        ...mapGetters([
+            'projects'
+            ]),
+        projects() {
+            return this.$store.getters.projects
+        }
+        
     },
     created(){
         
     },
     mounted(){
         //this.getProjects();
-        console.log(this.projects)
+        console.log(this.projects);
     },
     methods:{
-        ...mapActions(["getProjects"])
+        ...mapActions([
+            'getProjects'
+            ])
     }
 }
 </script>

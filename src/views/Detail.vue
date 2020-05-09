@@ -1,6 +1,24 @@
 <template>
     <div>
-            
+        <form >
+            <fieldset>
+                <div class="filed-group">
+                    <label for="name">Name</label>
+                    <input type="text" class="form-control" id="name" placeholder="Enter project name"
+                        v-model="project.name">
+                </div>
+                <div class="filed-group">
+                    <label for="desc">Description</label>
+                    <textarea class="form-control" id="desc" placeholder="Enter description"
+                    v-model="project.name"></textarea>
+                </div>
+                <div class="filed-group">
+                    <label for="sprintSize">Sprint Size</label>
+                    <input type="number" class="form-control" id="sprintSize" placeholder=""
+                        v-model="project.sprintSize">
+                </div>
+            </fieldset>
+        </form>
     </div>  
 </template>
 
@@ -21,7 +39,7 @@ export default {
     },
     created(){
         console.log(this.$route.params.projId )
-        svc.getProjectData(null, this.$route.params.projId)
+        svc.getProjectData(this.$route.params.projId)
         .then((data)=>{
             this.$store.commit('updateProject', data)
         })
