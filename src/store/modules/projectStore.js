@@ -13,12 +13,10 @@ const getters = {
             name : _.get(state,'project.name'),
             description: _.get(state,'project.description'),
             sprintSize: _.get(state,'project.sprintSize'),
+            tasks: _.get(state, 'tasks'),
             team: _.get(state,'project.team')
         }
     },
-    projectIssues:(state)=>{
-        return _.get(state, 'project.issues');
-    }
 }
 
 const mutations = {
@@ -29,12 +27,6 @@ const mutations = {
         state.project = project
     },
 
-    /**
-     * Update/replace issues of current project to store
-     */
-    updateIsseues: (state,issues)=>{
-        state.project.issues = issues;
-    }
 }
 
 const actions = {

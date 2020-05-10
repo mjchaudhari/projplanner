@@ -1,11 +1,19 @@
 <template>
   <div>
         
-        <nav class="nav nav-bar">
+        <nav class="navbar navbar-expand navbar-dark bg-dark">
             <h1 class="navbar-brand" >{{project.name}}</h1>
-            <router-link class="nav-link" :to="{name: 'plan', params:{projId: projId}}">Plan</router-link>
-            <router-link class="nav-link" :to="{name: 'detail', params:{projId: projId}}">Detail</router-link>
-            <router-link class="nav-link" :to="{name: 'projects'}">Back to all projects</router-link>
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <router-link class="nav-link" :to="{name: 'plan', params:{projId: projId}}">Plan</router-link>
+                </li>
+                <li class="nav-item">
+                    <router-link class="nav-link" :to="{name: 'detail', params:{projId: projId}}">Detail</router-link>
+                </li>
+                <li class="nav-item">
+                    <router-link class="nav-link" :to="{name: 'projects'}">Back to all projects</router-link>
+                </li>
+            </ul>
         </nav>
         <h3>{{project.description}}</h3>
         <router-view></router-view>
