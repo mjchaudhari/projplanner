@@ -20,7 +20,7 @@
                             <div class="filed-group">
                                 <label for="desc">Description</label>
                                 <textarea class="form-control" id="desc" placeholder="Enter description"
-                                v-model="project.name"></textarea>
+                                v-model="project.description"></textarea>
                             </div>
                             <div class="right">
                                 <button type="button" class="btn btn-primary " @click="saveProjDetail">Save details</button>
@@ -30,24 +30,29 @@
                 </fieldset>
             </form>
         </div>
-        <div>
-            <div class="card border-secondary mb-3" style="max-width: 20rem;" v-for="t in project.team" v-bind:key="t.id">
-                <div class="card-header">{{t.name}}</div>
-                <div class="card-body">
-                    <p/>
-                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                </div>
-            </div>
+        <div class="tasks-container">
+            <TaskCard :task="t" v-for="t in project.tasks" v-bind:key="t.id" @edit="editTask(t)"/>
+            <TaskCard  @create="editTask()"/>
         </div>
-        <pre>{{project}}</pre>
+        <EditTaskModal v-if="isEditModalOpen" @ok="ok" @cancel="cancel" :data="taskToEdit" ></EditTaskModal>
     </div>  
 </template>
 
 <script>
+import _ from "lodash";
+import TaskCard from "../components/TaskCard";
+import EditTaskModal from "../components/EditTaskModal"
 export default {
     name: "Detail",
+    components: {
+        TaskCard,
+        EditTaskModal
+    },
     data(){
-        return {}
+        return {
+            isEditModalOpen: false,
+            taskToEdit: null
+        }
     }, 
     computed:{
         project(){
@@ -63,11 +68,27 @@ export default {
     methods:{
         saveProjDetail(){
 
+        },
+        editTask(t){
+            this.isEditModalOpen = true
+            this.taskToEdit = _.cloneDeep(t)
+        },
+        ok(){
+            this.isEditModalOpen = false
+            this.taskToEdit = null
+        },
+        cancel(){
+            this.isEditModalOpen = false
+            this.taskToEdit = null
         }
     }
 }
 </script>
 
 <style>
-
+    .tasks-container {
+        display: flex;
+        flex-wrap: wrap;
+        margin:5px;
+     }
 </style>

@@ -1,7 +1,7 @@
 //import * as axios from 'axios'
 //import cfg from '../config.json'
 import { userCollection, projectCollection } from "../firebaseConfig"
-
+import _  from "lodash"
 function getUser(userName){
     let p = new Promise((resolve )=> {
         try {
@@ -61,18 +61,66 @@ function getProjectData (projId){
             .doc(projId)
             .get()
             .then( p => {
+
                 proj = p.data();
                 proj.id = p.id;
-                console.log(proj)
-                resolve(proj)
+                getProjectTasks(p.id)
+                    .then(tasks => {
+                        console.log(proj)
+                        proj.tasks = tasks
+                        resolve(proj)
+                    })
             })
     })
     return p;
 }
+function getProjectTasks (projId){
+    console.log(projId);
+    let p = new Promise(resolve => {
+        projectCollection
+            .doc(projId)
+            .collection('tasks')
+            .onSnapshot( (s) => {
+                let tasks = []
+                s.forEach(t => {
+                    let task = t.data();
+                    task.id = t.id;
+                    task.dependenciesRef = task.dependencies;
+                    task.dependencies = _.map( task.dependencies, (t)=> {
+                        if(t == null) return
+                        return t.id
+                    })
+                    tasks.push(task);
+                });
+                resolve(tasks);
+            })
+    })
+    return p;
+}
+
+function updateTask(projId, taskId, task){
+    let p = new Promise(resolve => {
+        let taskCollRef
+        let taskPromise 
+        if(taskId == null){
+            taskCollRef = projectCollection.doc(projId).collection('tasks').doc();
+            taskPromise = taskCollRef.set(task)
+
+        } else {
+            taskCollRef = projectCollection.doc(projId).collection('tasks').doc(taskId);
+            taskPromise = taskCollRef.update(task)
+        }
+        taskPromise.then(()=>{
+            resolve();
+        })
+    })
+    return p
+}
 const svc = {
     getUser,
     getProjects,
-    getProjectData
+    getProjectData,
+    updateTask
 };
 
 

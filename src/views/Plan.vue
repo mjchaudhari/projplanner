@@ -24,7 +24,7 @@ export default {
       }
     },
     computed:{
-        ...mapGetters(["projectDetails", "projectIssues"])
+        ...mapGetters(["projectDetails"])
     },
     created(){
         this.svg = null;
@@ -35,30 +35,10 @@ export default {
         this.svg = d3.select("#svgConainer").append("svg")
                     .attr("class", "chart");
         
-        this.tasks = this.flatternIssues();
+        this.tasks = this.buildDepChain(this.projectDetails.tasks);
         this.drawGantt(this.tasks);
     },
     methods:{
-        flatternIssues(){
-            //issues
-            let issues = []
-            //get containers
-            let containers = _.filter(this.projectIssues, {"type": "container"});
-            if(containers.length > 0) {
-                _.each(containers, function(c){
-                      _.each(c.children, function(t){
-                          t.container = {name: c.name};
-                          issues.push(t);
-                      });
-                });
-            } 
-            let nocontainerTasks = _.filter(this.projectIssues, function(iss){ iss.type != 'container'})
-            if(nocontainerTasks.length > 0) issues.push(nocontainerTasks);
-            issues = _.flatten(issues);
-            
-            this.buildDepChain(issues);
-            return issues;
-        },
         buildDepChain(issues){
             var chainedTasks = [];
             //find tasks with no dep
@@ -67,7 +47,7 @@ export default {
             })
             _.each(noDepTasks, (t)=>{
                 t.start = 1;
-                t.end = t.size;
+                t.end = +t.size;
             })
 
             _.each(issues,(t)=>{
@@ -79,7 +59,9 @@ export default {
         updateBounds(t, issues) {
             //find the dependent tasks on t and update bounds of each recursively
             issues.forEach((i)=>{
-                if(i.dependencies == null || 
+                if(i.id == t.id){
+                    //skip
+                } else if(i.dependencies == null || 
                     i.dependencies == "" || 
                     (Array.isArray(i.dependencies) && i.dependencies.length == 0)){
                     //skip
@@ -88,7 +70,7 @@ export default {
                     if(i.start == null || i.start < t.end){
                         i.start = t.end +1;
                     } 
-                    i.end = i.start + i.size - 1;
+                    i.end = i.start + (+i.size) - 1;
                     this.updateBounds(i, issues);
                 }
 
@@ -103,9 +85,9 @@ export default {
             let innerHeight = svgHeight - (margin.top + margin.bottom);
 
             //valueAccesser
-            const xValue = d => d.size;
+            const xValue = d => +d.size;
             const yValue = d => d.name ;
-            const cumulativePoints = _.sumBy(data, 'size');
+            const cumulativePoints = _.sumBy(data, d => +d.size);
 
             const xScale = d3.scaleLinear()
                   .domain([0, cumulativePoints+1])
