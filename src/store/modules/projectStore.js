@@ -1,14 +1,18 @@
 //import axios from "axios"
 import _ from 'lodash'
 import svc from '../../data/data.service';
-import { db } from "../../firebaseConfig"
+//import { db } from "../../firebaseConfig"
 
 const state = {
-    project : {}
+    project : {},
+    projDetail: {},
+    contributors:{},
+    tasks:{}
+
 }
 
 const getters = {
-    projectDetails:(state)=>{
+    project:(state)=>{
         return {
             id : _.get(state,'project.id'),
             name : _.get(state,'project.name'),
@@ -18,6 +22,15 @@ const getters = {
             team: _.get(state,'project.team')
         }
     },
+    projectDetails:(state)=>{
+        return state.project
+    },
+    tasks:(state)=>{
+        return state.tasks
+    },
+    contributors:(state)=>{
+        return state.contributors
+    }
 }
 
 const mutations = {
@@ -27,23 +40,49 @@ const mutations = {
     updateProject: (state, project)=>{
         state.project = project
     },
-
-    updateTask: (state, task) => {
-        let t = _.find(state.task, {id : task.id})
-        if(t != null){
-            t = task;
-        } else {
-            state.tasks.push(task)
-        }
+    updateTasks: (state, tasks) => {
+        state.tasks = tasks
+    },
+    updateContributors: (state, contributors) => {
+        state.contributors = contributors
     }
 }
 
 const actions = {
-    async getProjectData({commit}, params){
+    async getProjectDetails({commit}, params){
         let data  = await svc.getProjectData(params.projId)
         commit("updateProject", data)
     },
+    async getTasks({commit}, params){
+        let data  = await svc.getTasks(params.projId)
+        commit("updateTasks", data)
+    },
+    async getContributors({commit}, params){
+        let data  = await svc.getContributors(params.projId)
+        commit("updateContributors", data)
+    },
 
+    async updateProject({state, dispatch}, project){
+        let projId = state.project.id;
+
+        let p = {
+            name: project.name,
+            desc: project.desc,
+            size: project.sprintSize || 2,
+            //team: project.team || [],
+            createdBy: project.createdBy
+        }
+        // t.contributors = _.map(project.contributors, c=> {
+        //     if(c != null) {
+        //         return c.ref
+        //     } else {
+        //         return null
+        //     }
+        // })
+        let proj = await svc.updateProject(projId, p)
+        await dispatch('getProjectDetails', {projId: proj.id})
+        //dispatch('getContributors', {projId: projId})
+    },
     async updateTask({state, dispatch}, task){
         let projId = state.project.id;
 
@@ -54,15 +93,15 @@ const actions = {
             reqSkill: task.reqSkill || [],
             priority: task.priority || 0,
         }
-        t.dependencies = _.map(task.dependenciesRef, d=> {
+        t.dependencies = _.map(task.dependencies, d=> {
             if(d != null) {
-                return db.doc(d.path) 
+                return d.ref
             } else {
                 return null
             }
         })
         await svc.updateTask(projId, task.id,  t)
-        dispatch('getProjectData', {projId: projId})
+        await dispatch('getTasks', {projId: projId})
     }
 }
 

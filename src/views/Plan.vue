@@ -1,14 +1,22 @@
 <template>
     <div>
+        <a class="icon-btn floating-icon bottom-right">
+            <i class="material-icons  " v-on:click="editTask()">edit</i>
+            <small>Create Task</small>
+        </a>
         <div  class="fill">
             <div id="svgConainer">
             </div>
         </div>
+        <EditTaskModal v-if="isEditModalOpen" @ok="editTaskOk" @cancel="editTaskCancel" 
+            :data="taskToEdit"
+            :refTasks="tasks" >
+        </EditTaskModal>
     </div>  
 </template>
 
 <script>
-
+import EditTaskModal from "../components/EditTaskModal"
 import * as d3  from "d3";
 import _ from "lodash";
 import { mapGetters } from "vuex";
@@ -16,15 +24,19 @@ const margin={left:100, right:20, top:50, bottom: 20};
 
 export default {
     name: "Plan",
+    components: {
+        EditTaskModal
+    },
     data:()=>{
       return {
           title : "Plan view",
-          tasks : [],
-          svg : null
+          svg : null,
+          isEditModalOpen: false,
+          taskToEdit: null,
       }
     },
     computed:{
-        ...mapGetters(["projectDetails"])
+        ...mapGetters(["tasks"])
     },
     created(){
         this.svg = null;
@@ -35,10 +47,32 @@ export default {
         this.svg = d3.select("#svgConainer").append("svg")
                     .attr("class", "chart");
         
-        this.tasks = this.buildDepChain(this.projectDetails.tasks);
-        this.drawGantt(this.tasks);
+        this.drawChart()
     },
     methods:{
+        editTask(t){
+            this.isEditModalOpen = true
+            this.taskToEdit = _.cloneDeep(t)
+        },
+        editTaskOk(){
+            this.isEditModalOpen = false
+            this.taskToEdit = null
+            this.drawChart()
+        },
+        editTaskCancel(){
+            this.isEditModalOpen = false
+            this.taskToEdit = null
+        },
+        drawChart(){
+            let t = null
+            try{
+                t = this.buildDepChain(this.tasks);
+            } catch(e){
+                console.error(e)
+            }
+            
+            this.drawGantt(t);
+        },
         buildDepChain(issues){
             var chainedTasks = [];
             //find tasks with no dep
@@ -46,7 +80,7 @@ export default {
                 return i.dependencies == null || i.dependencies == "" || (Array.isArray(i.dependencies) && i.dependencies.length == 0);
             })
             _.each(noDepTasks, (t)=>{
-                t.start = 1;
+                t.start = 0;
                 t.end = +t.size;
             })
 
@@ -65,12 +99,12 @@ export default {
                     i.dependencies == "" || 
                     (Array.isArray(i.dependencies) && i.dependencies.length == 0)){
                     //skip
-                } else if (i.dependencies == t.id || i.dependencies.includes(t.id)){
+                } else if (i.dependencies == t.id || _.find(i.dependencies, {'id': t.id})){
                     //if already set by some other dependent then modify to higher value
                     if(i.start == null || i.start < t.end){
-                        i.start = t.end +1;
+                        i.start = (t.end || 1 ) + 1;
                     } 
-                    i.end = i.start + (+i.size) - 1;
+                    i.end = i.start + (+(i.size || 1)) - 1;
                     this.updateBounds(i, issues);
                 }
 
@@ -87,21 +121,27 @@ export default {
             //valueAccesser
             const xValue = d => +d.size;
             const yValue = d => d.name ;
-            const cumulativePoints = _.sumBy(data, d => +d.size);
-
+            let lastTask =_.maxBy(data, (d) =>{ return d.end; });
+            let lastTaskEnd = lastTask ? lastTask.end +1 : 1
             const xScale = d3.scaleLinear()
-                  .domain([0, cumulativePoints+1])
+                  .domain([0, lastTaskEnd])
                   .range([0, innerWidth])
             
             const xAxis = d3.axisTop(xScale);
-                        
+            xAxis.ticks(lastTaskEnd)
+                .tickSize(-innerHeight)
+            
+            
+            
+
             const yScale = d3.scaleBand()
                   .domain(data.map(yValue))
                   .range([0, innerHeight])
                   .padding(0.1)
 
             const yAxis = d3.axisLeft(yScale)
-
+            
+            this.svg.selectAll('*').remove();
             let g = this.svg.append('g')
                   .attr('transform', `translate(${margin.left}, ${margin.top})`)
             
@@ -117,10 +157,19 @@ export default {
                     .attr('x', d => xScale(d.start))
                     .attr('width', d=> xScale(xValue(d)))
                     .attr('height', yScale.bandwidth())
+                    .on('dblclick', (d) =>{
+                        console.log(d)
+                        this.editTask(d)
+                    })
                     
             rectEnter.append('text')
                   .text(d=>d.name)
                   .attr('class', 'text-on-bar')
+
+            g.selectAll('rect')
+                    .exit()
+                    .remove()
+            
         }
     }
 }
@@ -150,7 +199,11 @@ export default {
     .rect{
         rx:5;
     }
-
+    .tick line{
+        stroke: lightgrey;
+        stroke-opacity: 1;
+        shape-rendering: crispEdges;
+    }
     /* SVG end */
 
 </style>

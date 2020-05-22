@@ -17,12 +17,15 @@ Vue.use(VueRouter)
     component: Home
   },
   {
-    path: './:userId/projects',
+    path: '/:userId/projects',
     name: 'projects',
     component: Projects,
     beforeEnter: (to, from,  next) =>{
         //Get all projects of this user
-        store.dispatch('getProjects', to.params.userId )
+        Promise.all([
+          store.dispatch('getUserDetails', to.params.userId),
+          store.dispatch('getProjects', to.params.userId )
+        ])
         .then (()=>{
           console.log("proejcts updated in store")
           next();
@@ -34,11 +37,14 @@ Vue.use(VueRouter)
   },
   {
     //name:'project',
-    path:'/:projId',
+    path:'/:userId/:projId',
     component: Project,
     beforeEnter: (to, from, next) =>{
         let projId = to.params.projId;
-        store.dispatch('getProjectData', { projId })
+        Promise.all([
+          store.dispatch('getProjectDetails', { projId }),
+          store.dispatch('getTasks', { projId })
+        ])
         .then (()=>{
           console.log("proejcts getched in store")
           next();

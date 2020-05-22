@@ -17,12 +17,14 @@ function getUser(userName){
                 if(snapshot.empty == true) {
                     userCollection.add(user).then(docref => {
                         user.id = docref.id
+                        user.ref = docref.ref
                         resolve(user);
                     });
 
                 } else {
                     user = snapshot.docs[0].data();
                     user.id = snapshot.docs[0].id
+                    user.ref = snapshot.docs[0].ref
                     resolve(user);
                 }
             });
@@ -34,7 +36,97 @@ function getUser(userName){
 
     return p;
 }
+
+async function getUserDetails(id){
+    let u = await userCollection.doc(id).get()
+    let user = u.data();
+    user.id = u.id;
+    user.ref = u.ref
+    return user;
+}
+
+function updateUserDetails(user){
+    let p = new Promise((resolve )=> {
+        try {
+        var u = {
+            firstName: user.firstName,
+            lastName: user.lastName
+        }    
+        userCollection.doc(user.id)
+            .update(u)
+            .then(()=>{
+                resolve(user);
+            });
+        }
+        catch(e){
+            console.error(e);
+        }            
+    });
+
+    return p;
+}
+
+function updateProject(projId, project){
+    let p = new Promise(resolve => {
+        let projDocRef
+        let projPromise 
+        if(projId == null){
+            projDocRef = projectCollection.doc()
+            projPromise = projDocRef.set(project)
+
+        } else {
+            projDocRef = projectCollection.doc(projId);
+            projPromise = projDocRef.update(project)
+        }
+        projPromise.then(()=>{
+            resolve();
+        })
+    })
+    return p
+}
 function getProjects (userId){
+    console.log(userId)
+    let p = new Promise((resolve )=> {
+        //get projects created by current user
+        // 
+        let userRef = userCollection.doc(userId)
+        let promises = []
+        Promise.all([
+            projectCollection.where("createdBy", "==", userRef),
+            projectCollection.where("contributors", "array-contains", userRef)
+        ]).then((ss)=>{
+            ss.forEach(s => {
+                let sp = new Promise((res) => {
+                    s.onSnapshot(sp => {
+                        let projects = []
+                        sp.forEach( p => {
+                            // var existing = _.find(projects, {id : p.id})
+                            // if(existing != null)
+                            //     return;
+
+                            let proj = p.data();
+                            proj.id = p.id;
+                            proj.ref = p.red
+                            projects.push(proj);
+                        })
+                        res(projects)
+                    }); 
+                })
+                promises.push(sp)
+            });
+            
+            Promise.all(promises)
+            .then((data)=>{
+                //console.data(data)
+                let projects = _.unionBy(...data, "id")
+                console.log(projects.length)
+                resolve(projects)
+            })  
+        })
+    })
+    return p;
+}
+function getProjects1 (userId){
     console.log(userId)
     let p = new Promise((resolve )=> {
         //get projects created by current user
@@ -61,10 +153,34 @@ function getProjectData (projId){
             .doc(projId)
             .get()
             .then( p => {
-
                 proj = p.data();
                 proj.id = p.id;
-                getProjectTasks(p.id)
+                proj.ref = p.ref
+                proj.createdBy
+                    .get()
+                        .then(u=>{
+                            let c = u.data()
+                            c.id = u.id;
+                            c.ref = u.ref
+                            proj.createdBy = c
+                            resolve(proj)
+                        })
+                
+            })
+    })
+    return p;
+}
+function getProject (projId){
+    console.log(projId);
+    let proj = {}
+    let p = new Promise(resolve => {
+        projectCollection
+            .doc(projId)
+            .get()
+            .then( p => {
+                proj = p.data();
+                proj.id = p.id;
+                getTasks(p.id)
                     .then(tasks => {
                         console.log(proj)
                         proj.tasks = tasks
@@ -74,30 +190,78 @@ function getProjectData (projId){
     })
     return p;
 }
-function getProjectTasks (projId){
+
+function getContributors (projId){
     console.log(projId);
     let p = new Promise(resolve => {
+        let projectTaskPromies = []
         projectCollection
             .doc(projId)
             .collection('tasks')
             .onSnapshot( (s) => {
-                let tasks = []
                 s.forEach(t => {
-                    let task = t.data();
-                    task.id = t.id;
-                    task.dependenciesRef = task.dependencies;
-                    task.dependencies = _.map( task.dependencies, (t)=> {
-                        if(t == null) return
-                        return t.id
-                    })
-                    tasks.push(task);
+                    let projTaskPromise = getTaskDependencies(t)
+                    projectTaskPromies.push(projTaskPromise)
                 });
-                resolve(tasks);
+                Promise.all(projectTaskPromies)
+                .then((projTasks)=>{
+                    resolve(projTasks)
+                })
+            })
+    })
+    return p;
+}
+function getTasks (projId){
+    console.log(projId);
+    let p = new Promise(resolve => {
+        let projectTaskPromies = []
+        projectCollection
+            .doc(projId)
+            .collection('tasks')
+            .onSnapshot( (s) => {
+                s.forEach(t => {
+                    let projTaskPromise = getTaskDependencies(t)
+                    projectTaskPromies.push(projTaskPromise)
+                });
+                Promise.all(projectTaskPromies)
+                .then((projTasks)=>{
+                    resolve(projTasks)
+                })
             })
     })
     return p;
 }
 
+function getTaskDependencies(t){
+    let p = new Promise((resolveTask)=>{
+        let task = t.data()
+        task.id = t.id;
+        task.ref = t.ref
+        let dependenciesPromises = []
+        if(task.dependencies != null &&  task.dependencies.length > 0){
+            _.forEach(task.dependencies, d=>{
+                if(d!=null){
+                    let depPromise = new Promise((resolveDep) => {
+                        d.get()
+                        .then(td=>{
+                            let taskDep = td.data()
+                            taskDep.id = td.id
+                            taskDep.ref = td.ref
+                            resolveDep(taskDep)
+                        })
+                    })
+                    dependenciesPromises.push(depPromise)   
+                } 
+            })
+        }
+        Promise.all(dependenciesPromises)
+        .then((depTasks) =>{
+            task.dependencies = depTasks
+            resolveTask(task)
+        })
+    })
+    return p;
+}
 function updateTask(projId, taskId, task){
     let p = new Promise(resolve => {
         let taskCollRef
@@ -118,8 +282,15 @@ function updateTask(projId, taskId, task){
 }
 const svc = {
     getUser,
+    getUserDetails,
+    updateUserDetails,
     getProjects,
+    getProjects1,
+    getProject,
+    updateProject,
     getProjectData,
+    getTasks,
+    getContributors,
     updateTask
 };
 

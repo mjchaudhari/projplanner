@@ -54,7 +54,11 @@ body{
 	top: 0;
 	left: 0;
 	position: absolute;
-	margin: 10px;
+  margin: 10px;
+  text-align: center;
+  display: flex;
+	flex-direction: column;
+  padding: 5px;
 }
 .floating-icon.left {
   top: 0;
@@ -398,7 +402,7 @@ dd {
   overflow: hidden;
   display: flex;
 	flex-direction: column;
-	padding: 15px;
+	padding: 1rem;
 	pointer-events: auto;
 	background-color: #fff;
 	background-clip: padding-box;
@@ -409,10 +413,10 @@ dd {
 	right: 25%;
 }
 .mod-lg{
-  top: 10%;
-  right: 10%;
-  bottom: 10%;
-  left: 10%;
+  top: 5%;
+	right: 10%;
+	bottom: 5%;
+	left: 10%;
 }
 
 .mod-md{
@@ -433,7 +437,7 @@ dd {
   display: flex;
 	align-items: flex-start;
 	justify-content: space-between;
-	padding: 1rem 1rem;
+	
 	border-bottom: 2px solid #333;
 	border-top-left-radius: 33px;
 	border-top-right-radius: 33px;
@@ -442,11 +446,12 @@ dd {
 .mod-body{
   position: relative;
 	flex: 1 1 auto;
-	padding: 1rem;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .mod-footer{
-	padding: 15px;
+	margin: .5rem;
 	border-top: 0;
 	justify-content: flex-end;
 	display: flex;

@@ -1,40 +1,32 @@
 <template>
     <div class="">
-        <div class="alert alert-dismissible alert-primary">
-            <form  class>
-                <fieldset class="">
-                    <div class="row">
-                        <div class="col-5">
-                            <div class="filed-group">
-                                <label for="name">Name</label>
-                                <input type="text" class="form-control" id="name" placeholder="Enter project name"
-                                    v-model="project.name">
-                            </div>
-                            <div class="filed-group ">
-                                <label for="sprintSize">Sprint Size</label>
-                                <input type="number" class="form-control col-3" id="sprintSize" placeholder=""
-                                    v-model="project.sprintSize">
-                            </div>
-                        </div>
-                        <div class="col-7">
-                            <div class="filed-group">
-                                <label for="desc">Description</label>
-                                <textarea class="form-control" id="desc" placeholder="Enter description"
-                                v-model="project.description"></textarea>
-                            </div>
-                            <div class="right">
-                                <button type="button" class="btn btn-primary " @click="saveProjDetail">Save details</button>
-                            </div>
-                        </div>
-                    </div>
-                </fieldset>
-            </form>
+        
+        <div class="proj-details sketchy-border">
+            <div class="props-header">
+                <h1 class="display-3">{{projectDetails.name}}</h1>
+                <i class="material-icons icon-btn" v-on:click="editProject(projectDetails)">edit</i>
+            </div>
+            
+            <p class="lead">{{projectDetails.desc}}</p>
+            <hr class="my-2">
+            <div class="props-container">
+                <span>Sprint size: <strong>{{projectDetails.sprintSize}}</strong></span>
+                <span>Created by: <strong>{{projectDetails.createdBy.firstName || projectDetails.createdBy.emailId}}</strong></span>
+            </div>
+            
         </div>
         <div class="tasks-container">
-            <TaskCard :task="t" v-for="t in project.tasks" v-bind:key="t.id" @edit="editTask(t)"/>
+            <TaskCard :task="t" v-for="t in tasks" v-bind:key="t.id" @edit="editTask(t)"/>
             <TaskCard  @create="editTask()"/>
         </div>
-        <EditTaskModal v-if="isEditModalOpen" @ok="ok" @cancel="cancel" :data="taskToEdit" ></EditTaskModal>
+        <EditProjectModal v-if="isEditProjectModalOpen" @ok="editProjectOk" @cancel="editProjectCancel" 
+            :data="projectToEdit"
+            >
+        </EditProjectModal>
+        <EditTaskModal v-if="isEditModalOpen" @ok="editTaskOk" @cancel="editTaskCancel" 
+            :data="taskToEdit"
+            :refTasks="tasks" >
+        </EditTaskModal>
     </div>  
 </template>
 
@@ -42,22 +34,25 @@
 import _ from "lodash";
 import TaskCard from "../components/TaskCard";
 import EditTaskModal from "../components/EditTaskModal"
+import EditProjectModal from "../components/EditProjectModal"
+import { mapGetters } from 'vuex';
 export default {
     name: "Detail",
     components: {
         TaskCard,
-        EditTaskModal
+        EditTaskModal,
+        EditProjectModal
     },
     data(){
         return {
             isEditModalOpen: false,
-            taskToEdit: null
+            taskToEdit: null,
+            isEditProjectModalOpen: false,
+            projectToEdit: null
         }
     }, 
     computed:{
-        project(){
-            return this.$store.getters.projectDetails || {};
-        }
+        ...mapGetters(['projectDetails','tasks'])
     },
     beforeCreate(){
       console.log('before create : ' + this.$route.params.projId );
@@ -73,19 +68,50 @@ export default {
             this.isEditModalOpen = true
             this.taskToEdit = _.cloneDeep(t)
         },
-        ok(){
+        editTaskOk(){
             this.isEditModalOpen = false
             this.taskToEdit = null
         },
-        cancel(){
+        editTaskCancel(){
             this.isEditModalOpen = false
             this.taskToEdit = null
+        },
+        editProject(p){
+            this.isEditProjectModalOpen = true
+            this.projectToEdit = {
+                
+            }
+            this.projectToEdit = _.cloneDeep(p)
+        },
+        editProjectOk(){
+            this.isEditProjectModalOpen = false
+            this.projectToEdit = null
+        },
+        editProjectCancel(){
+            this.isEditProjectModalOpen = false
+            this.projectToEdit = null
         }
     }
 }
 </script>
 
 <style>
+    .proj-details{
+        padding: 1rem;
+        margin: 0.5rem;
+    }
+    .props-header{
+        display: flex;
+        flex-wrap: wrap;
+        margin:5px;
+        justify-content: space-between;
+    }
+    .props-container {
+        display: flex;
+        flex-wrap: wrap;
+        margin:5px;
+        justify-content: space-between;
+     }
     .tasks-container {
         display: flex;
         flex-wrap: wrap;

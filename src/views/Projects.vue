@@ -1,6 +1,7 @@
 <template>
   <div div="col-md-12">
       <h1>Projects</h1>
+        <i class="material-icons icon-btn" v-on:click="editProject">edit</i> Create project
         <div class="col-md-12 row"  >
             <div class="col-md-4" v-for="p in projects" v-bind:key="p.id">
                 <div class="card border-info mb-3" >
@@ -14,16 +15,29 @@
                 </div>
           </div> 
       </div> 
+      <EditProjectModal 
+        v-if="isEditProjectModalOpen" 
+        @ok="editProjectOk" 
+        @cancel="editProjectCancel" 
+        :data="projectToEdit">
+      </EditProjectModal>
   </div>  
 </template>
 <script>
 //import svc from "../data/data.service";
 import { mapActions, mapGetters } from 'vuex';
+import _ from "lodash";
+import EditProjectModal from "../components/EditProjectModal"
 export default {
   name: "Projects",
+  components:{
+      EditProjectModal
+  },
   data:()=>{
       return {
           title: "Projects",
+            isEditProjectModalOpen: false,
+            projectToEdit: {}
       }
     },
     computed:{
@@ -45,7 +59,23 @@ export default {
     methods:{
         ...mapActions([
             'getProjects'
-            ])
+        ]),
+        editProject(p){
+            this.isEditProjectModalOpen = true
+            this.projectToEdit = {
+                
+            }
+            this.projectToEdit = _.cloneDeep(p)
+        },
+        editProjectOk(){
+            this.isEditProjectModalOpen = false
+            this.projectToEdit = null
+        },
+        editProjectCancel(){
+            this.isEditProjectModalOpen = false
+            this.projectToEdit = null
+        }
+        
     }
 }
 </script>

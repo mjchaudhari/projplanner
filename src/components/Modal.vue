@@ -3,7 +3,7 @@
     <div class="mod-window">
         <div class="mod-backdrop">
         </div>
-        <div class="mod-content sketchy-border ">
+        <div class="mod-content sketchy-border " :class="[classes]">
             <div class="mod-header">
                 <h1>
                     {{title}}
@@ -25,7 +25,8 @@
 export default {
   name: 'modal',
   props: {
-    title: String
+    title: String,
+    classes: String
   },
   methods:{
     ok(){

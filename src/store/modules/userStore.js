@@ -23,6 +23,14 @@ const actions = {
         let user = await svc.getUser(signinData.username)
         commit('SET_USER', user);
         return user;
+    },
+    async getUserDetails ({commit, state}, userId){
+        if (state.user){
+            return user;
+        }
+        let user = await svc.getUserDetails(userId)
+        commit('SET_USER', user);
+        return user;
     }
 }
 const getters = {
