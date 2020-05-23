@@ -1,7 +1,10 @@
 <template>
   <div div="col-md-12">
-      <h1>Projects</h1>
-        <i class="material-icons icon-btn" v-on:click="editProject">edit</i> Create project
+        <h1>Projects</h1>
+        <a class="icon-btn floating-icon bottom-right">
+            <i class="material-icons  " v-on:click="editProject()">edit</i>
+            <small>Create Project</small>
+        </a>
         <div class="col-md-12 row"  >
             <div class="col-md-4" v-for="p in projects" v-bind:key="p.id">
                 <div class="card border-info mb-3" >
