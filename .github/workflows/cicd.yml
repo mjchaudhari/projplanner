@@ -31,11 +31,14 @@ jobs:
       run: |
         npm run build
         echo --------build finished!-------------
-    - uses: secrethub/actions/env-export@v0.1.0
-      env: 
+        
+    - name: set-env
+    - uses: allenevans/set-env@v1.1.0
+      with: 
           GH_EMAIL: ${{ secrets.GH_EMAIL }}
           GH_USER: ${{ secrets.GH_USER }}
           PLANNER_GH_PAGES_ACCESS_TOKEN: ${{ secrets.PLANNER_GH_PAGES_ACCESS_TOKEN }}
+    
     - name: Set git config and deploy
       run: |
         echo env "$GH_EMAIL" "$GH_USER"
