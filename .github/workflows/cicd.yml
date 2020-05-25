@@ -33,9 +33,9 @@ jobs:
         echo --------build finished!-------------
     - name: Set git config and deploy
       run: |
-        git config --global user.email ${{secrets.GH_EMAIL}}
-        git config --global user.name ${{scerets.GH_USER}}
-        git remote set-url origin https://${{secrets.PLANNER_GH_PAGES_ACCESS_TOKEN}}@github.com/${{secrets.GH_USER}}/projplanner.git 
+        git config --global user.email ${{ secrets.GH_EMAIL }}
+        git config --global user.name ${{ scerets.GH_USER }}
+        git remote set-url origin https://${{ secrets.PLANNER_GH_PAGES_ACCESS_TOKEN }}@github.com/${{ secrets.GH_USER }}/projplanner.git 
         echo starting deploy....
         npm run deploy
     
