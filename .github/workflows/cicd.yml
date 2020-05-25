@@ -31,16 +31,17 @@ jobs:
       run: |
         npm run build
         echo --------build finished!-------------
-    - name: Set git config and deploy
-      run: |
-        env: 
+    - uses: secrethub/actions/env-export@v0.1.0
+      env: 
           GH_EMAIL: ${{ secrets.GH_EMAIL }}
           GH_USER: ${{ secrets.GH_USER }}
           PLANNER_GH_PAGES_ACCESS_TOKEN: ${{ secrets.PLANNER_GH_PAGES_ACCESS_TOKEN }}
-        echo env $GH_EMAIL $GH_USER
-        git config --global user.email $GH_EMAIL
-        git config --global user.name $scerets.GH_USER }}
-        git remote set-url origin https://$PLANNER_GH_PAGES_ACCESS_TOKEN@github.com/$GH_USER/projplanner.git 
+    - name: Set git config and deploy
+      run: |
+        echo env "$GH_EMAIL" "$GH_USER"
+        git config --global user.email "$GH_EMAIL"
+        git config --global user.name "$scerets.GH_USER"
+        git remote set-url origin https://"$PLANNER_GH_PAGES_ACCESS_TOKEN"@github.com/"$GH_USER"/projplanner.git 
         echo starting deploy....
         npm run deploy
     
