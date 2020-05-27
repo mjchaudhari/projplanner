@@ -102,9 +102,9 @@ export default {
                 } else if (i.dependencies == t.id || _.find(i.dependencies, {'id': t.id})){
                     //if already set by some other dependent then modify to higher value
                     if(i.start == null || i.start < t.end){
-                        i.start = (t.end || 1 ) + 1;
+                        i.start = (t.end || 0 );
                     } 
-                    i.end = i.start + (+(i.size || 1)) - 1;
+                    i.end = i.start + (+(i.size || 1));
                     this.updateBounds(i, issues);
                 }
 
