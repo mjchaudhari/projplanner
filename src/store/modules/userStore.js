@@ -11,7 +11,12 @@ const mutations = {
     },
     updateProjects(state, projectsData){
         state.projects = projectsData;
-    }
+    },
+
+    resetUserStore: (state) => {
+        state.projects = [],
+        state.user = {}
+    },
 }
 
 const actions = {
@@ -31,7 +36,8 @@ const actions = {
         let user = await svc.getUserDetails(userId)
         commit('SET_USER', user);
         return user;
-    }
+    },
+    
 }
 const getters = {
     projects(state){

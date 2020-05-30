@@ -27,7 +27,7 @@
 </template>
 
 <script>
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState, mapMutations } from 'vuex'
 // @ is an alias to /src
 export default {
   name: 'Home',
@@ -41,8 +41,14 @@ export default {
       emailId : ""
     }
   },
+  mounted() {
+    this.resetUserStore()
+    this.resetProjectStore()
+  },
   methods:{
       ...mapActions(['signInUser', 'getProjects']),
+      ...mapMutations(['resetUserStore', 'resetProjectStore']),
+
       signIn(){
         if(this.emailId != null && this.emailId != "") {
             this.$store.dispatch("signInUser", {username: this.emailId})

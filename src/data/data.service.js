@@ -66,24 +66,41 @@ function updateUserDetails(user){
     return p;
 }
 
-function updateProject(projId, project){
-    let p = new Promise(resolve => {
-        let projDocRef
-        let projPromise 
-        if(projId == null){
-            projDocRef = projectCollection.doc()
-            projPromise = projDocRef.set(project)
+async function updateProject(projId, project){
+    
+    let projDocRef
+    let updated = null
+    if(projId == null){
+        projDocRef = projectCollection.doc()
+        await projDocRef.set(project)
+        project.id = projDocRef.id
+        console.log('added')
 
-        } else {
-            projDocRef = projectCollection.doc(projId);
-            projPromise = projDocRef.update(project)
-        }
-        projPromise.then(()=>{
-            resolve();
-        })
-    })
-    return p
+    } else {
+        projDocRef = projectCollection.doc(projId);
+        updated = await projDocRef.update(project)
+    }
+
+    return updated
 }
+// function updateProject(projId, project){
+//     let p = new Promise(resolve => {
+//         let projDocRef
+//         let projPromise 
+//         if(projId == null){
+//             projDocRef = projectCollection.doc()
+//             projPromise = projDocRef.add(project)
+
+//         } else {
+//             projDocRef = projectCollection.doc(projId);
+//             projPromise = projDocRef.update(project)
+//         }
+//         projPromise.then((proj)=>{
+//             resolve(proj);
+//         })
+//     })
+//     return p
+// }
 function getProjects (userId){
     console.log(userId)
     let p = new Promise((resolve )=> {
@@ -123,25 +140,6 @@ function getProjects (userId){
                 resolve(projects)
             })  
         })
-    })
-    return p;
-}
-function getProjects1 (userId){
-    console.log(userId)
-    let p = new Promise((resolve )=> {
-        //get projects created by current user
-        let userRef = userCollection.doc(userId)
-        projectCollection
-            .where("contributors", "array-contains", userRef)
-            .onSnapshot( (s) => {
-                let projects = [];
-                s.forEach(p => {
-                    let proj = p.data();
-                    proj.id = p.id;
-                    projects.push(proj);
-                });
-                resolve(projects);
-            })
     })
     return p;
 }
@@ -285,7 +283,6 @@ const svc = {
     getUserDetails,
     updateUserDetails,
     getProjects,
-    getProjects1,
     getProject,
     updateProject,
     getProjectData,

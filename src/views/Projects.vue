@@ -1,19 +1,28 @@
 <template>
   <div div="col-md-12">
-        <h1>Projects</h1>
+        <nav class="navbar navbar-expand ">
+            <h1 class="navbar-brand" >Projects</h1>
+            {{currentUser.fisrtName || currentUser.emailId}}
+            
+        </nav>
         <a class="icon-btn floating-icon bottom-right">
-            <i class="material-icons  " v-on:click="editProject()">edit</i>
+            <i class="material-icons  " v-on:click="createProject()">edit</i>
             <small>Create Project</small>
         </a>
         <div class="col-md-12 row"  >
             <div class="col-md-4" v-for="p in projects" v-bind:key="p.id">
-                <div class="card border-info mb-3" >
-                    <div class="card-body" >
+                <div class="card border-default mb-3" >
+                    <div class="card-header">
                         <h4 class="card-title">{{p.name}}</h4>
-                        <p class="card-text">{{p.description}}</p>
+                        &nbsp;&nbsp;
+                        <i class="material-icons icon-btn floating-icon right" v-on:click="leaveProj(p.id)">delete</i>                    
+                    </div>
+                    <div class="card-body" >
+                        <p class="card-text">{{p.desc}}</p>
                         <router-link :key="p.id" class="" :to="{name: 'plan', params:{projId: p.id} }">
-                            {{p.name}}
+                            <i class="material-icons "> visibility</i> 
                         </router-link>
+                        
                     </div>
                 </div>
           </div> 
@@ -45,11 +54,10 @@ export default {
     },
     computed:{
         ...mapGetters([
+            'currentUser',
             'projects'
-            ]),
-        projects() {
-            return this.$store.getters.projects
-        }
+        ])
+        
         
     },
     created(){
@@ -61,9 +69,10 @@ export default {
     },
     methods:{
         ...mapActions([
-            'getProjects'
+            'getProjects',
+            'leaveProject'
         ]),
-        editProject(p){
+        createProject(p){
             this.isEditProjectModalOpen = true
             this.projectToEdit = {
                 
@@ -73,12 +82,15 @@ export default {
         editProjectOk(){
             this.isEditProjectModalOpen = false
             this.projectToEdit = null
+            this.getProjects() 
         },
         editProjectCancel(){
             this.isEditProjectModalOpen = false
             this.projectToEdit = null
-        }
-        
+        },
+        leaveProj(id){
+            this.leaveProject(id)
+        }        
     }
 }
 </script>

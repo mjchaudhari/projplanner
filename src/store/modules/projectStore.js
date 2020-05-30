@@ -6,8 +6,8 @@ import svc from '../../data/data.service';
 const state = {
     project : {},
     projDetail: {},
-    contributors:{},
-    tasks:{}
+    contributors:[],
+    tasks:[]
 
 }
 
@@ -34,6 +34,11 @@ const getters = {
 }
 
 const mutations = {
+    resetProjectStore: (state) => {
+        state.project = {},
+        state.tasks = [];
+        state.contributors = [];
+    },
     /***
      * Update/replace/add current project to store
      */
@@ -67,10 +72,25 @@ const actions = {
 
         let p = {
             name: project.name,
-            desc: project.desc,
+            desc: project.desc || '',
             size: project.sprintSize || 2,
             //team: project.team || [],
             createdBy: project.createdBy
+        }
+        // t.contributors = _.map(project.contributors, c=> {
+        //     if(c != null) {
+        //         return c.ref
+        //     } else {
+        //         return null
+        //     }
+        // })
+        let proj = await svc.updateProject(projId, p)
+        await dispatch('getProjectDetails', {projId: proj.id})
+        //dispatch('getContributors', {projId: projId})
+    },
+    async leaveProject({dispatch}, projId){
+        let p = {
+            createdBy: null
         }
         // t.contributors = _.map(project.contributors, c=> {
         //     if(c != null) {

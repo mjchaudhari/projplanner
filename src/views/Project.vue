@@ -1,7 +1,7 @@
 <template>
   <div>
         
-        <nav class="navbar navbar-expand navbar-dark bg-dark">
+        <nav class="navbar navbar-expand ">
             <h1 class="navbar-brand" >{{project.name}}</h1>
             <ul class="navbar-nav">
                 <li class="nav-item">

@@ -10,7 +10,8 @@
   position: absolute;
 }
 body{
-	
+  background-image: url('./paper-small.jpg');
+  background-size: cover;
 }
 .navbar{
   border-width: 2px;
@@ -404,8 +405,10 @@ dd {
 	flex-direction: column;
 	padding: 1rem;
 	pointer-events: auto;
-	background-color: #fff;
-	background-clip: padding-box;
+  /* background-color: #fff; */
+  background-image: url('./paper-small.jpg');
+  background-clip: padding-box;
+  background-attachment: cover;
   outline: 0;
   top: 25%;
 	bottom: 25%;
@@ -518,4 +521,8 @@ ul.dropdown-content {
   border-width: 2px;
 	border-style: solid;
 	border-radius: 25px 25px 55px 5px/5px 55px 25px 25px;
+}
+
+.card, .form-control {
+  background-color: transparent;
 }
