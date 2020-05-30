@@ -15,7 +15,7 @@
                     <div class="card-header">
                         <h4 class="card-title">{{p.name}}</h4>
                         &nbsp;&nbsp;
-                        <i class="material-icons icon-btn floating-icon right" v-on:click="leaveProj(p.id)">delete</i>                    
+                        <!-- <i class="material-icons icon-btn floating-icon right" v-on:click="leaveProj(p.id)">delete</i>                     -->
                     </div>
                     <div class="card-body" >
                         <p class="card-text">{{p.desc}}</p>
