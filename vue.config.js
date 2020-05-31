@@ -1,3 +1,5 @@
 module.exports = {
-  publicPath: '/projplanner/'
+  publicPath: process.env.NODE_ENV === 'production'
+    ? './'
+    : './'
 }
